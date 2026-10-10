@@ -1,0 +1,63 @@
+name: Queue board UI release
+on:
+  push:
+    tags:
+      - 'queue-board/*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6
+
+      - name: Use Node 22.x
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22.x
+          cache: 'yarn'
+
+      - name: Install deps
+        run: yarn install --immutable
+        env:
+          CI: true
+
+      - name: Build api typings and ui
+        run: |
+          yarn workspace @bull-board/api build
+          yarn workspace @bull-board/ui build
+
+      - name: Test ui
+        run: yarn workspace @bull-board/ui test
+
+      - name: Pack bull-board-queue-ui
+        run: |
+          version="${GITHUB_REF_NAME#queue-board/}"
+          mkdir -p release/package
+          cp -R packages/ui/dist release/package/dist
+          cp LICENSE release/package/LICENSE
+          node -e '
+            const fs = require("fs")
+            const [version] = process.argv.slice(1)
+            const pkg = {
+              name: "bull-board-queue-ui",
+              version,
+              description: "bull-board UI with a queue map, throughput and ETA",
+              license: "MIT",
+              repository: { type: "git", url: `git+https://github.com/${process.env.GITHUB_REPOSITORY}.git`, directory: "packages/ui" },
+              files: ["dist", "LICENSE"],
+            }
+            fs.writeFileSync("release/package/package.json", JSON.stringify(pkg, null, 2) + "\n")
+          ' "$version"
+          (cd release && npm pack ./package)
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" release/*.tgz \
+            --title "$GITHUB_REF_NAME" \
+            --notes "Install with: npm install --save-exact https://github.com/${GITHUB_REPOSITORY}/releases/download/${GITHUB_REF_NAME}/$(cd release && ls *.tgz)"
