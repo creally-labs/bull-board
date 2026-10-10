@@ -2,6 +2,7 @@ import { CSSProperties, PropsWithChildren } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink, NavLinkProps } from 'react-router-dom';
 import { useOverflowFade } from '../../hooks/useOverflowFade';
+import { formatCount } from '../../queueBoard/formatCount';
 import { dynamicTranslationKey } from '../../utils/dynamicTranslationKey';
 import { toCamelCase } from '../../utils/toCamelCase';
 import s from './StatusTabs.module.css';
@@ -48,7 +49,9 @@ export const StatusTabs = ({ items, children }: PropsWithChildren<StatusTabsProp
                 <NavLink to={to} activeClassName={s.isActive} isActive={isActive}>
                   {dot && <span className={s.dot} />}
                   <span data-text={displayStatus}>{displayStatus}</span>
-                  {count != null && count > 0 && <span className={s.badge}>{count}</span>}
+                  {count != null && count > 0 && (
+                    <span className={s.badge}>{formatCount(count)}</span>
+                  )}
                 </NavLink>
               </li>
             );

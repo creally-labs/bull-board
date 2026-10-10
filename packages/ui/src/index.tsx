@@ -4,9 +4,10 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import { App } from './App';
 import { ApiContext } from './hooks/useApi';
-import './index.css';
 import { useSettingsStore } from './hooks/useSettings';
+import './index.css';
 import { UIConfigContext } from './hooks/useUIConfig';
+import { setQueueBoardConfig, type QueueBoardUIConfig } from './queueBoard/config';
 import { Api } from './services/Api';
 import './theme.css';
 import './hljs.css';
@@ -27,6 +28,8 @@ const queryClient = new QueryClient({
 const uiConfig = JSON.parse(
   document.getElementById('__UI_CONFIG__')?.textContent || '{}'
 ) as UIConfig;
+
+setQueueBoardConfig((uiConfig as QueueBoardUIConfig).queueBoard);
 
 applyThemeOverrides(uiConfig.theme);
 

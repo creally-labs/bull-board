@@ -1,4 +1,5 @@
 import type { AppQueue } from '@bull-board/api/typings/app';
+import { queueGroupPath } from '../queueBoard/config';
 
 export interface AppQueueTreeNode {
   name: string;
@@ -13,7 +14,9 @@ export function toTree(queues: AppQueue[], sort = false): AppQueueTreeNode {
   };
 
   queues.forEach((queue) => {
-    if (!queue.delimiter) {
+    const groupPath = queueGroupPath(queue.name);
+
+    if (!groupPath && !queue.delimiter) {
       // If no delimiter, add as direct child to root
       root.children.push({
         name: queue.name,
@@ -25,7 +28,7 @@ export function toTree(queues: AppQueue[], sort = false): AppQueueTreeNode {
 
     const nameToSplit =
       queue.name.startsWith('{') && queue.name.endsWith('}') ? queue.name.slice(1, -1) : queue.name;
-    const parts = nameToSplit.split(queue.delimiter);
+    const parts = groupPath ? [...groupPath, queue.name] : nameToSplit.split(queue.delimiter);
     let currentLevel = root.children;
 
     parts.forEach((part, index) => {

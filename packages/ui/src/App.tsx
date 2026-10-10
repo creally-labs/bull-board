@@ -1,6 +1,6 @@
 import { Tooltip } from '@base-ui/react/tooltip';
 import React, { Suspense, useEffect } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 import { ConfirmModal } from './components/ConfirmModal/ConfirmModal';
 import { Header } from './components/Header/Header';
 import { HeaderActions } from './components/HeaderActions/HeaderActions';
@@ -16,6 +16,9 @@ import { useMobileQuery } from './hooks/useMobileQuery';
 import { useScrollTopOnNav } from './hooks/useScrollTopOnNav';
 import { useSearchHotkey } from './hooks/useSearchHotkey';
 import { useSettingsStore } from './hooks/useSettings';
+import { isQueueMapLocation } from './queueBoard/config';
+import { QueueRatesProvider } from './queueBoard/QueueRatesProvider';
+import { ViewTabs } from './queueBoard/ViewTabs';
 
 const JobPageLazy = React.lazy(() =>
   import('./pages/JobPage/JobPage').then(({ JobPage }) => ({ default: JobPage }))
@@ -37,6 +40,10 @@ const MetricsHistoryPageLazy = React.lazy(() =>
   }))
 );
 
+const QueueMapPageLazy = React.lazy(() =>
+  import('./queueBoard/QueueMapPage').then(({ QueueMapPage }) => ({ default: QueueMapPage }))
+);
+
 const SchedulersPageLazy = React.lazy(() =>
   import('./pages/SchedulersPage/SchedulersPage').then(({ SchedulersPage }) => ({
     default: SchedulersPage,
@@ -48,6 +55,7 @@ export const App = () => {
   const { confirmProps } = useConfirm();
   const isMobile = useMobileQuery();
   const sidebarCollapsed = useSettingsStore((state) => state.sidebarCollapsed);
+  const isQueueMapView = isQueueMapLocation(useLocation());
   useLanguageWatch();
   useDarkMode();
   useSearchHotkey();
@@ -62,30 +70,37 @@ export const App = () => {
 
   return (
     <Tooltip.Provider delay={400} closeDelay={100}>
-      <Header>
-        <div className="header-title-group">
-          {!isMobile && <SidebarToggle />}
-          <Title />
-        </div>
-        <HeaderActions />
-      </Header>
-      {!isMobile && <Menu />}
-      <main>
-        <div>
-          <Suspense fallback={<Loader />}>
-            <Switch>
-              <Route path="/queue/:name/:jobId" render={() => <JobPageLazy />} />
-              <Route path="/queue/:name" render={() => <QueuePageLazy />} />
-              <Route path="/metrics-history" exact render={() => <MetricsHistoryPageLazy />} />
-              <Route path="/job-schedulers" exact render={() => <SchedulersPageLazy />} />
+      <QueueRatesProvider>
+        <Header>
+          <div className="header-title-group">
+            {!isMobile && <SidebarToggle />}
+            <ViewTabs />
+            <Title />
+          </div>
+          <HeaderActions />
+        </Header>
+        {!isMobile && <Menu />}
+        <main>
+          <div>
+            <Suspense fallback={<Loader />}>
+              <Switch>
+                <Route path="/queue/:name/:jobId" render={() => <JobPageLazy />} />
+                <Route path="/queue/:name" render={() => <QueuePageLazy />} />
+                <Route path="/metrics-history" exact render={() => <MetricsHistoryPageLazy />} />
+                <Route path="/job-schedulers" exact render={() => <SchedulersPageLazy />} />
 
-              <Route path="/" exact render={() => <OverviewPageLazy />} />
-            </Switch>
-          </Suspense>
-          <ConfirmModal {...confirmProps} />
-        </div>
-      </main>
-      <Toaster />
+                <Route
+                  path="/"
+                  exact
+                  render={() => (isQueueMapView ? <QueueMapPageLazy /> : <OverviewPageLazy />)}
+                />
+              </Switch>
+            </Suspense>
+            <ConfirmModal {...confirmProps} />
+          </div>
+        </main>
+        <Toaster />
+      </QueueRatesProvider>
     </Tooltip.Provider>
   );
 };

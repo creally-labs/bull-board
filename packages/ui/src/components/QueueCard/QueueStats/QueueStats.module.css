@@ -59,9 +59,9 @@
   text-decoration: underline;
 }
 
-/* Failures are the one thing on the card allowed to shout. */
-.flagAlert {
-  color: var(--status-failed);
+/* How much work is still waiting is the headline of the card. */
+.flagPrimary {
+  color: var(--status-waiting);
 }
 
 .flagDot {
@@ -81,8 +81,9 @@
   color: var(--foreground);
 }
 
-.flagAlert .flagCount {
-  color: var(--status-failed);
+.flagPrimary .flagCount {
+  color: var(--status-waiting);
+  font-weight: 600;
 }
 
 .total {

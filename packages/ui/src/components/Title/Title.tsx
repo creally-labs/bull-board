@@ -2,6 +2,7 @@ import React, { Suspense, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useActiveQueue } from '../../hooks/useActiveQueue';
 import { useMobileQuery } from '../../hooks/useMobileQuery';
+import { QueueRateBadge } from '../../queueBoard/QueueRateBadge';
 import { Button } from '../Button/Button';
 import { InfoIcon } from '../Icons/Info';
 import s from './Title.module.css';
@@ -36,6 +37,7 @@ export const Title = () => {
             >
               <InfoIcon className={s.infoIcon} />
             </Button>
+            <QueueRateBadge queueName={queue.name} />
           </div>
           {queue.description && <p className={s.description}>{queue.description}</p>}
         </>

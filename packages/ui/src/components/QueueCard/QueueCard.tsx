@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router-dom';
 import { useModal } from '../../hooks/useModal';
 import { useQueueActions } from '../../hooks/useQueueActions';
+import { QueueRateBadge } from '../../queueBoard/QueueRateBadge';
 import { links } from '../../utils/links';
 import { Card } from '../Card/Card';
 import { InfoIcon } from '../Icons/Info';
@@ -74,6 +75,7 @@ export const QueueCard = ({ queue, displayName }: IQueueCardProps) => {
           )}
         </div>
       </div>
+      <QueueRateBadge queueName={queue.name} />
       <QueueStats queue={queue} />
       <Suspense fallback={null}>
         {modal.isMounted('addJob') && (

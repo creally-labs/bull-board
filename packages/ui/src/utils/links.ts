@@ -39,6 +39,12 @@ export const links = {
       search,
     };
   },
+  queueMap() {
+    return {
+      pathname: '/',
+      search: new URLSearchParams({ view: 'map' }).toString(),
+    };
+  },
   metricsHistory() {
     return {
       pathname: '/metrics-history',

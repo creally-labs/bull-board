@@ -3,6 +3,7 @@ import cn from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { useOverviewState } from '../../hooks/useMenuState';
 import { useQueueActions } from '../../hooks/useQueueActions';
+import { formatCount } from '../../queueBoard/formatCount';
 import { dynamicTranslationKey } from '../../utils/dynamicTranslationKey';
 import { retriableFailedJobs } from '../../utils/failedRetries';
 import {
@@ -43,7 +44,7 @@ const AggregateCounts = ({ counts }: { counts: AggregatedCounts }) => {
           title={t(dynamicTranslationKey(`QUEUE.STATUS.${status.toUpperCase()}`))}
         >
           <span className={s.countDot} style={{ backgroundColor: `var(--status-${status})` }} />
-          {counts.byStatus[status]}
+          {formatCount(counts.byStatus[status] ?? 0)}
         </span>
       ))}
     </span>
