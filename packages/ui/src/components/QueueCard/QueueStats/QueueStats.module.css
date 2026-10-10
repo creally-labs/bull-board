@@ -36,6 +36,8 @@
   align-items: baseline;
   gap: 0.75rem;
   min-width: 0;
+  /* Tall enough for a status flag, so cards with and without one line up. */
+  min-height: 1.45rem;
 }
 
 /* Only the states worth reacting to get a slot on the card face. Both are conditional,

@@ -1,5 +1,6 @@
 import cn from 'clsx';
 import { Tooltip } from '../components/Tooltip/Tooltip';
+import { getQueueBoardConfig } from './config';
 import { useQueueRate } from './QueueRatesProvider';
 import type { QueueRate } from './rates';
 import { formatDuration, formatRate } from './rates';
@@ -50,5 +51,22 @@ export const QueueRateBadge = ({
 }) => {
   const rate = useQueueRate(queueName);
 
-  return rate ? <QueueRateLine rate={rate} className={className} /> : null;
+  if (rate) {
+    return <QueueRateLine rate={rate} className={className} />;
+  }
+
+  if (!getQueueBoardConfig()) {
+    return null;
+  }
+
+  return (
+    <Tooltip
+      title="No worker metrics recorded for this queue yet"
+      className={cn(s.line, s.idle, className)}
+    >
+      <span>—/min</span>
+      <span className={s.separator}>·</span>
+      <span className={s.headline}>no metrics</span>
+    </Tooltip>
+  );
 };
