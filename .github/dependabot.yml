@@ -1,10 +1,21 @@
 # .github/dependabot.yml
 version: 2
 updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 0
+    commit-message:
+      prefix: "fix(deps)"
+
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
+    open-pull-requests-limit: 0
+    commit-message:
+      prefix: "fix(deps)"
     exclude-paths:
       - "examples"
       - "examples/**"
