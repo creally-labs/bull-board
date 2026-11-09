@@ -27,6 +27,7 @@ jobs:
 
       - name: Build api typings and ui
         run: |
+          export PATH="$PWD/node_modules/.bin:$PATH"
           yarn workspace @bull-board/api build
           yarn workspace @bull-board/ui build
 
