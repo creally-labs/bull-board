@@ -1,8 +1,9 @@
-import type { AppQueue } from '@bull-board/api/typings/app';
+import type { AppQueue, Status } from '@bull-board/api/typings/app';
 import cn from 'clsx';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { useSearchParams } from '../../../hooks/useSearchParams';
 import { formatCount } from '../../../queueBoard/formatCount';
 import { dynamicTranslationKey } from '../../../utils/dynamicTranslationKey';
 import { links } from '../../../utils/links';
@@ -18,10 +19,13 @@ export const QueueStats = ({ queue }: IQueueStatsProps) => {
   const { t } = useTranslation();
   const total = queue.statuses.reduce((result, status) => result + (queue.counts[status] || 0), 0);
   const nonZeroStatuses = queue.statuses.filter((status) => (queue.counts[status] ?? 0) > 0);
-  const queued =
-    (queue.counts.waiting || 0) + (queue.counts.prioritized || 0) + (queue.counts.paused || 0);
-  const active = queue.counts.active || 0;
-  const failed = queue.counts.failed || 0;
+  const { status: selectedStatus } = useSearchParams();
+  const queued = selectedStatus
+    ? 0
+    : (queue.counts.waiting || 0) + (queue.counts.prioritized || 0) + (queue.counts.paused || 0);
+  const flagStatuses = [
+    ...new Set<Status>(selectedStatus ? [selectedStatus, 'failed'] : ['active', 'failed']),
+  ].filter((status) => (queue.counts[status] ?? 0) > 0);
   const jobsLabel = t('DASHBOARD.JOBS_COUNT', { count: total, postProcess: 'groupDigits' });
 
   /* The queue pulse: proportional per-status composition of the queue. */
@@ -71,28 +75,18 @@ export const QueueStats = ({ queue }: IQueueStatsProps) => {
             <span className={s.flagCount}>{formatCount(queued)}</span>
           </Link>
         )}
-        {active > 0 && (
+        {flagStatuses.map((status) => (
           <Link
-            to={links.queuePage(queue.name, { [queue.name]: 'active' })}
+            key={status}
+            to={links.queuePage(queue.name, { [queue.name]: status })}
             className={s.flag}
-            style={{ '--flag-color': 'var(--status-active)' } as CSSProperties}
+            style={{ '--flag-color': `var(--status-${status})` } as CSSProperties}
           >
             <span className={s.flagDot} />
-            {t('QUEUE.STATUS.ACTIVE')}
-            <span className={s.flagCount}>{formatCount(active)}</span>
+            {t(dynamicTranslationKey(`QUEUE.STATUS.${status.toUpperCase()}`))}
+            <span className={s.flagCount}>{formatCount(queue.counts[status] ?? 0)}</span>
           </Link>
-        )}
-        {failed > 0 && (
-          <Link
-            to={links.queuePage(queue.name, { [queue.name]: 'failed' })}
-            className={s.flag}
-            style={{ '--flag-color': 'var(--status-failed)' } as CSSProperties}
-          >
-            <span className={s.flagDot} />
-            {t('QUEUE.STATUS.FAILED')}
-            <span className={s.flagCount}>{formatCount(failed)}</span>
-          </Link>
-        )}
+        ))}
         <span className={s.total}>{jobsLabel}</span>
       </div>
     </div>
